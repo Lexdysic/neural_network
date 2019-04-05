@@ -3,6 +3,8 @@
 #include <numeric>
 #include <cassert>
 
+namespace neural_network {
+
 Value ActivationLinear (Value value) {
     return value;
 }
@@ -19,7 +21,8 @@ Value ActivationSigmoid (Value value) {
     return Value(1) / (Value(1) + std::exp(-value));
 }
 
-NeuralNetwork::NeuralNetwork (
+
+Network::Network (
     size_t                        inputSize,
     std::initializer_list<size_t> hiddenSizes, 
     size_t                        outputSize
@@ -45,7 +48,7 @@ NeuralNetwork::NeuralNetwork (
     initLayer(m_layers.back(), outputSize);
 }
 
-NeuralNetwork::NeuralNetwork (size_t inputSize, std::initializer_list<std::initializer_list<Value>> layers)
+Network::Network (size_t inputSize, std::initializer_list<std::initializer_list<Value>> layers)
     : m_inputSize(inputSize)
     , m_layers(layers.size())
     , m_activation(ActivationThreshold)
@@ -66,7 +69,7 @@ NeuralNetwork::NeuralNetwork (size_t inputSize, std::initializer_list<std::initi
     }
 }
 
-void NeuralNetwork::Run (const Values & inputs) {
+void Network::Run (const Values & inputs) {
     assert(inputs.size() == m_inputSize);
 
     const Values * previous = &inputs;
@@ -93,7 +96,7 @@ void NeuralNetwork::Run (const Values & inputs) {
 
 }
 
-void NeuralNetwork::Assign (std::initializer_list<std::initializer_list<Value>> layers) {
+void Network::Assign (std::initializer_list<std::initializer_list<Value>> layers) {
     size_t prevSize = m_inputSize;
     auto assignLayer = [&prevSize](Layer & layer, std::initializer_list<Value> weights) {
         size_t neuronSize = weights.size() / prevSize;
@@ -112,6 +115,8 @@ void NeuralNetwork::Assign (std::initializer_list<std::initializer_list<Value>> 
     }
 }
 
-const Values & NeuralNetwork::GetOutput () const {
+const Values & Network::GetOutput () const {
     return m_layers.back().neurons;
 }
+
+} // namespace neural_network

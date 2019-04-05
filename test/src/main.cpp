@@ -4,7 +4,7 @@
 #include <neural_network/neural_network.h>
 
 TEST_CASE("Simple XOR", "[run]") {
-    NeuralNetwork nn(2, {2}, 1);
+    neural_network::Network nn(2, {2}, 1);
 
     nn.Assign(
         {
