@@ -25,12 +25,12 @@ NeuralNetwork::NeuralNetwork (
     size_t                        outputSize
 )
     : m_inputSize(inputSize)
-    , m_layers(hiddenSizes.size() + 1)
+    , m_layers(hiddenSizes.size() + size_t(1))
     , m_activation(ActivationThreshold)
 {
     size_t prevSize = inputSize;
     auto initLayer = [&prevSize](Layer & layer, size_t size) {
-        assert(size > 0);
+        assert(size > size_t(0));
         layer.neurons.resize(size);
         layer.weights.resize(size * prevSize);
 
@@ -43,6 +43,27 @@ NeuralNetwork::NeuralNetwork (
     }
 
     initLayer(m_layers.back(), outputSize);
+}
+
+NeuralNetwork::NeuralNetwork (size_t inputSize, std::initializer_list<std::initializer_list<Value>> layers)
+    : m_inputSize(inputSize)
+    , m_layers(layers.size())
+    , m_activation(ActivationThreshold)
+{
+    size_t prevSize = inputSize;
+    auto initLayer = [&prevSize](Layer & layer, std::initializer_list<Value> weights) {
+        size_t size = weights.size() / prevSize;
+
+        layer.neurons.resize(size);
+        layer.weights.assign(weights);
+
+        prevSize = size;
+    };
+
+    auto layerIt = m_layers.begin();
+    for (auto weights : layers) {
+        initLayer(*layerIt++, weights);
+    }
 }
 
 void NeuralNetwork::Run (const Values & inputs) {
@@ -70,6 +91,25 @@ void NeuralNetwork::Run (const Values & inputs) {
         previous = &layer.neurons;
     }
 
+}
+
+void NeuralNetwork::Assign (std::initializer_list<std::initializer_list<Value>> layers) {
+    size_t prevSize = m_inputSize;
+    auto assignLayer = [&prevSize](Layer & layer, std::initializer_list<Value> weights) {
+        size_t neuronSize = weights.size() / prevSize;
+        assert(weights.size() == layer.weights.size());
+        assert(neuronSize == layer.neurons.size());
+
+        layer.neurons.resize(neuronSize);
+        layer.weights.assign(weights);
+
+        prevSize = neuronSize;
+    };
+
+    auto layerIt = m_layers.begin();
+    for (auto weights : layers) {
+        assignLayer(*layerIt++, weights);
+    }
 }
 
 const Values & NeuralNetwork::GetOutput () const {

@@ -11,11 +11,13 @@ using ActivationFunction = Value (*)(Value);
 class NeuralNetwork {
 public:
     NeuralNetwork (size_t inputSize, std::initializer_list<size_t> hiddenSizes, size_t outputSize);
+    NeuralNetwork (size_t inputSize, std::initializer_list<std::initializer_list<Value>> weights);
     NeuralNetwork (const NeuralNetwork &) = default;
     NeuralNetwork (NeuralNetwork &&) = default;
 
     void Run (const Values & input);
-    void Train (const Values & input, const Values & output);
+    void Assign (std::initializer_list<std::initializer_list<Value>> weights);
+    //void Train (const Values & input, const Values & output);
 
     const Values & GetOutput () const;
 
