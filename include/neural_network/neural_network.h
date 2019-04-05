@@ -1,22 +1,33 @@
 
 #include <stdint.h>
 #include <vector>
+#include <istream>
 
-using Weight  = float;
-using Neuron  = float;
-using Layer   = std::vector<Neuron>;
-using Weights = std::vector<Weight>;
+using Value  = float;
+using Values = std::vector<Value>;
+
+using ActivationFunction = Value (*)(Value);
 
 class NeuralNetwork {
 public:
-    void Run (const Layer & input);
-    void Train (const Layer & input, const Layer & output);
+    NeuralNetwork (size_t inputSize, std::initializer_list<size_t> hiddenSizes, size_t outputSize);
+    NeuralNetwork (const NeuralNetwork &) = default;
+    NeuralNetwork (NeuralNetwork &&) = default;
 
-    void Read (FILE * file);
-    void Write (FILE * file);
+    void Run (const Values & input);
+    void Train (const Values & input, const Values & output);
+
+    const Values & GetOutput () const;
+
 
 private:
-    std::vector<Layer> m_hidden;
-    Layer              m_outputs;
-    Layer              m_delta;
+    struct Layer {
+        Values neurons;
+        Values weights;
+        Value  bias = 0;
+    };
+
+    ActivationFunction m_activation;
+    size_t             m_inputSize;
+    std::vector<Layer> m_layers;
 };
